@@ -18,7 +18,9 @@
       "@components/*": ["components/*"],
       "@pages/*": ["pages/*"],
       "@hooks/*": ["hooks/*"],
-      "@layouts/*": ["layouts/*"]
+      "@layouts/*": ["layouts/*"],
+      "@constants/*": ["constants/*"],
+      "@icons/*": ["icons/*"]
     }
   },
   "include": [

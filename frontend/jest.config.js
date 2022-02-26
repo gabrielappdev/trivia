@@ -6,5 +6,7 @@ module.exports = {
     "^@pages(.*)$": "<rootDir>/src/pages$1",
     "^@hooks(.*)$": "<rootDir>/src/hooks$1",
     "^@layouts(.*)$": "<rootDir>/src/layouts$1",
+    "^@constants(.*)$": "<rootDir>/src/constants$1",
+    "^@icons(.*)$": "<rootDir>/src/icons$1",
   },
 };
