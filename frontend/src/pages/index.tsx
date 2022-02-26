@@ -7,7 +7,7 @@ const mock = {
   description: "Easy contest with entrance cost of 37 coins",
   prizePool: 0,
   active: true,
-  expiration_date: "2022-01-25T00:13:32.362Z",
+  expiration_date: "2022-02-28T00:17:32.362Z",
   slug: "contest-1-animals",
   cost: 37,
   difficulty: "easy",

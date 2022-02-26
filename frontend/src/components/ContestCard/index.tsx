@@ -4,6 +4,7 @@ import {
   Divider,
   Heading,
   HStack,
+  Tag,
   Text,
   theme,
   Tooltip,
@@ -72,32 +73,35 @@ const ContestCard = ({
             <DifficultyTag difficulty={difficulty} />
             <ActiveTag status={active ? "active" : "inactive"} />
           </HStack>
-          <Link href={getRoute("contests", slug)}>
-            <div>
-              <Countdown date={expirationDate}>
-                <Button
-                  cursor="pointer"
-                  colorScheme="yellow"
-                  size="md"
-                  leftIcon={<CoinIcon />}
-                  onClick={() => console.log("clicked")}
-                >
-                  Play
-                </Button>
-              </Countdown>
-            </div>
-          </Link>
+          {active && (
+            <Link href={getRoute("contests", slug)}>
+              <Button
+                cursor="pointer"
+                colorScheme="yellow"
+                size="md"
+                leftIcon={<CoinIcon />}
+                onClick={() => console.log("clicked")}
+              >
+                Play
+              </Button>
+            </Link>
+          )}
         </HStack>
         <Divider colorScheme="yellow" />
-        <HStack px={4} py={2} align="center" justify="space-between">
-          <HStack spacing={2} data-testid="cost">
-            <CoinIcon />
-            <Text fontSize="sm">Cost: {cost}</Text>
+        <HStack px={4} py={1} align="center" justify="space-between">
+          <HStack spacing={2}>
+            <HStack spacing={2} data-testid="cost">
+              <CoinIcon />
+              <Text fontSize="sm">Cost: {cost}</Text>
+            </HStack>
+            <HStack spacing={2} data-testid="pool">
+              <CoinIcon />
+              <Text fontSize="sm">Pool: {prizePool}</Text>
+            </HStack>
           </HStack>
-          <HStack spacing={2} data-testid="pool">
-            <CoinIcon />
-            <Text fontSize="sm">Pool: {prizePool}</Text>
-          </HStack>
+          <Countdown size="xs" prefix="ends in:" date={expirationDate}>
+            closed
+          </Countdown>
         </HStack>
       </Box>
     </Box>
