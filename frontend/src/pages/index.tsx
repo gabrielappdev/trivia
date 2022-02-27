@@ -1,4 +1,4 @@
-import { Heading, SimpleGrid } from "@chakra-ui/react";
+import { Box, Heading, SimpleGrid, Skeleton } from "@chakra-ui/react";
 import ContestCard, { ContestCardProps } from "@components/ContestCard";
 import Section from "@components/Section";
 import { getEndpoint } from "@constants/index";
@@ -27,7 +27,18 @@ const Index = ({ activeContests }: IndexProps) => {
   }, [data?.length]);
 
   if (error) return <div>failed to load</div>;
-  if (!data) return <div>loading...</div>;
+  if (!data || !contests)
+    return (
+      <MainTemplate>
+        <Box py="100px">
+          <SimpleGrid gap={4} columns={{ sm: 1, md: 3, lg: 4 }}>
+            {Array.from(new Array(20)).map((_, index) => (
+              <Skeleton w="100%" h="227px" key={index} />
+            ))}
+          </SimpleGrid>
+        </Box>
+      </MainTemplate>
+    );
 
   return (
     <MainTemplate>

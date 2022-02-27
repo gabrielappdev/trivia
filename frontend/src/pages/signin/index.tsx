@@ -118,12 +118,12 @@ const SignIn = () => {
 
   return (
     <SignTemplate>
-      <Box bg="white" shadow="md" p={4} borderRadius={4}>
-        <VStack alignItems="flex-start" spacing={2}>
+      <Box w="100%" bg="white" shadow="md" p={4} borderRadius={4}>
+        <VStack w="inherit" alignItems="flex-start" spacing={2}>
           <Heading mb="2" size="md">
             Sign in
           </Heading>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form style={{ width: "100%" }} onSubmit={handleSubmit(onSubmit)}>
             <Input
               {...register("identifier", { required: true })}
               placeholder="E-mail or Username"
