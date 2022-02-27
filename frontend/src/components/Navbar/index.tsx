@@ -111,13 +111,16 @@ const Navbar = () => {
       justify="space-between"
       borderBottom={`1px solid ${theme.colors.yellow[400]}`}
     >
-      <Image
-        src="/assets/logo.png"
-        alt="Trivia logo"
-        objectFit="contain"
-        h="auto"
-        w="160px"
-      />
+      <Link href="/">
+        <Image
+          src="/assets/logo.png"
+          alt="Trivia logo"
+          objectFit="contain"
+          h="auto"
+          w="160px"
+          cursor="pointer"
+        />
+      </Link>
       {getRightAdorment()}
     </HStack>
   );
