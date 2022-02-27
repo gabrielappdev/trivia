@@ -1,12 +1,10 @@
 import {
   Box,
   Button,
-  Container,
   Divider,
   Flex,
   Heading,
   IconButton,
-  Image,
   Input,
   InputGroup,
   InputRightAddon,
@@ -26,22 +24,24 @@ import { useRecoilState } from "recoil";
 import { useRouter } from "next/router";
 import SignTemplate from "@layouts/sign";
 
-type SignInDefaultValuesProps = {
-  identifier: string;
+type SignUpDefaultValuesProps = {
+  email: string;
   password: string;
+  confirmPassword: string;
 };
 
 const localStorage = new LocalStorage();
 
-const SignIn = () => {
+const SignUp = () => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignInDefaultValuesProps>({
+  } = useForm<SignUpDefaultValuesProps>({
     defaultValues: {
-      identifier: "",
+      email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
@@ -54,24 +54,17 @@ const SignIn = () => {
 
   const [visiblePasswordsState, setVisiblePasswordsState] = useState({
     password: false,
+    confirmPassword: false,
   });
 
   useEffect(() => {
     const token = localStorage.getData("_trivia")?.user?.jwt;
     if (!!token) {
-      router.push("/");
-      toast({
-        title: `You are already signed !`,
-        status: "warning",
-        duration: 3000,
-        isClosable: true,
-      });
-    } else {
       localStorage.removeData("_trivia");
     }
   }, [user]);
 
-  const togglePasswordVisibility = (type: "password") => {
+  const togglePasswordVisibility = (type: "password" | "confirmPassword") => {
     setVisiblePasswordsState({
       ...visiblePasswordsState,
       [type]: !visiblePasswordsState[type],
@@ -83,19 +76,30 @@ const SignIn = () => {
     localStorage.setData("_trivia", { user: userObject });
   };
 
-  const onSubmit = async (submitData: SignInDefaultValuesProps) => {
+  const onSubmit = async (submitData: SignUpDefaultValuesProps) => {
+    const { password, confirmPassword } = submitData;
+    if (password !== confirmPassword) {
+      return toast({
+        title: "Error",
+        description: "Please, check your passwords.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
     setIsLoading(true);
     try {
       const data = { ...submitData };
+      delete data.confirmPassword;
       const {
         data: { jwt, user },
-      } = await axiosClient.post(getEndpoint("signin"), data);
+      } = await axiosClient.post(getEndpoint("signup"), data);
       const storedUser = { ...user, jwt };
 
       persistUser(storedUser);
 
       toast({
-        title: `Welcome ${user.username}`,
+        title: `Welcome ${user.email}`,
         description: "Enjoy our platform!",
         status: "success",
         duration: 3000,
@@ -121,12 +125,13 @@ const SignIn = () => {
       <Box bg="white" shadow="md" p={4} borderRadius={4}>
         <VStack alignItems="flex-start" spacing={2}>
           <Heading mb="2" size="md">
-            Sign in
+            Sign up
           </Heading>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Input
-              {...register("identifier", { required: true })}
-              placeholder="E-mail or Username"
+              {...register("email", { required: true })}
+              placeholder="E-mail"
+              type="email"
               mb={4}
             />
             <InputGroup>
@@ -151,9 +156,33 @@ const SignIn = () => {
                 />
               </InputRightAddon>
             </InputGroup>
+            <InputGroup>
+              <Input
+                {...register("confirmPassword", { required: true })}
+                isInvalid={!!errors?.confirmPassword}
+                placeholder="Password confirmation"
+                type={
+                  visiblePasswordsState["confirmPassword"] ? "text" : "password"
+                }
+                mb={4}
+              />
+              <InputRightAddon>
+                <IconButton
+                  onClick={() => togglePasswordVisibility("confirmPassword")}
+                  aria-label="Display password"
+                  icon={
+                    visiblePasswordsState["confirmPassword"] ? (
+                      <FaEyeSlash />
+                    ) : (
+                      <FaEye />
+                    )
+                  }
+                />
+              </InputRightAddon>
+            </InputGroup>
             <Flex align="center" w="100%">
               <Button isLoading={isLoading} colorScheme="green" type="submit">
-                Enter
+                Register
               </Button>
               <Button
                 isDisabled={isLoading}
@@ -166,9 +195,9 @@ const SignIn = () => {
             </Flex>
             <Divider my={4} />
             <VStack w="100%" justify="flex-end">
-              <Text fontSize="md">Don`t have a account yet ?</Text>
-              <Link href={getRoute("signup")}>
-                <Button colorScheme="blue">Create account</Button>
+              <Text fontSize="md">Do you already have an account ?</Text>
+              <Link href={getRoute("signin")}>
+                <Button colorScheme="blue">Sign in</Button>
               </Link>
             </VStack>
           </form>
@@ -178,4 +207,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default SignUp;
