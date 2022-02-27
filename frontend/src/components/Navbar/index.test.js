@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render } from "../../test";
 import Navbar from ".";
 
 test("Should render a navbar with logo and join button", () => {

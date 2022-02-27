@@ -1,13 +1,15 @@
 // test-utils.js
+import React from "react";
 import { render } from "@testing-library/react";
 import { ChakraProvider } from "@chakra-ui/react";
+import { RecoilRoot } from "recoil";
 
 import theme from "../theme";
 
 const Providers = ({ children }) => {
   return (
     <ChakraProvider resetCSS theme={theme}>
-      {children};
+      <RecoilRoot>{children};</RecoilRoot>
     </ChakraProvider>
   );
 };

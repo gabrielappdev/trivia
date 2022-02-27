@@ -9,5 +9,6 @@ export const user = atom({
     confirmed: true,
     blocked: false,
     jwt: "",
+    coins: 0,
   },
 });
