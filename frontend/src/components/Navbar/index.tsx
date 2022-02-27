@@ -17,9 +17,10 @@ import Link from "next/link";
 import { user as userAtom } from "@atoms/user";
 import { useRecoilState } from "recoil";
 import CoinIcon from "@icons/Coin";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { LocalStorage } from "@services/localStorage";
 import axiosClient from "@services/api";
+import useSWR from "swr";
 
 const localStorage = new LocalStorage();
 
@@ -32,23 +33,35 @@ const Navbar = () => {
   const [user, setUser] = useRecoilState(userAtom);
   const [isLoadingUser, setIsLoadingUser] = useState(false);
 
-  useEffect(() => {
-    const fetchMe = async (token: string) => {
-      setIsLoadingUser(true);
-      try {
-        const { data } = await axiosClient(getEndpoint("me"));
-        setUser({ ...data, jwt: token });
-      } catch (error) {
-        //
-      } finally {
-        setIsLoadingUser(false);
+  const shouldFetchUser = useMemo(() => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getData("_trivia")?.user?.jwt;
+      if (token) {
+        return true;
       }
-    };
-    const token = localStorage.getData("_trivia")?.user?.jwt;
-    if (token && !user?.email) {
-      fetchMe(token);
+      return false;
     }
+    return false;
   }, [user]);
+
+  const { data } = useSWR(
+    shouldFetchUser ? getEndpoint("me") : null,
+    async (url) => {
+      setIsLoadingUser(true);
+      const { data } = await axiosClient(url);
+      setIsLoadingUser(false);
+      const token = localStorage.getData("_trivia")?.user?.jwt;
+      return { ...data, jwt: token };
+    },
+    { refreshInterval: 120000 }
+  );
+
+  useEffect(() => {
+    console.log(data);
+    if (data?.id) {
+      setUser(data);
+    }
+  }, [data]);
 
   const handleLogout = () => {
     localStorage.removeData("_trivia");
