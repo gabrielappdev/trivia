@@ -8,6 +8,7 @@ import {
   Text,
   theme,
   Tooltip,
+  useToast,
   VStack,
 } from "@chakra-ui/react";
 import CoinIcon from "@icons/Coin";
@@ -16,6 +17,9 @@ import Link from "next/link";
 import DifficultyTag from "./Tags/Difficulty";
 import ActiveTag from "./Tags/Active";
 import Countdown from "@components/Countdown";
+import { user as userAtom } from "@atoms/user";
+import { useRecoilState } from "recoil";
+import { useRouter } from "next/router";
 
 type ContestCardProps = {
   title: string;
@@ -29,6 +33,10 @@ type ContestCardProps = {
   category: string;
 };
 
+type PlayButtonProps = {
+  onClick?: () => void;
+};
+
 const ContestCard = ({
   title,
   description,
@@ -40,6 +48,46 @@ const ContestCard = ({
   cost,
   category,
 }: ContestCardProps) => {
+  const [user] = useRecoilState(userAtom);
+
+  const toast = useToast();
+  const router = useRouter();
+
+  const PlayButton = ({ onClick }: PlayButtonProps) => {
+    return (
+      <Button
+        cursor="pointer"
+        colorScheme="yellow"
+        size="md"
+        leftIcon={<CoinIcon />}
+        onClick={onClick ? onClick : () => ({})}
+      >
+        Play
+      </Button>
+    );
+  };
+
+  const ProtectedPlayButton = () => {
+    const handleUnsignewdUserClick = () => {
+      toast({
+        title: `You must be signed to attend this contest`,
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      router.push(getRoute("signin"));
+    };
+    if (user?.id) {
+      return (
+        <Link href={getRoute("contests", slug)}>
+          <PlayButton />
+        </Link>
+      );
+    } else {
+      return <PlayButton onClick={handleUnsignewdUserClick} />;
+    }
+  };
+
   return (
     <Box
       data-testid="contest-card-wrapper"
@@ -73,19 +121,7 @@ const ContestCard = ({
             <DifficultyTag difficulty={difficulty} />
             <ActiveTag status={active ? "active" : "inactive"} />
           </HStack>
-          {active && (
-            <Link href={getRoute("contests", slug)}>
-              <Button
-                cursor="pointer"
-                colorScheme="yellow"
-                size="md"
-                leftIcon={<CoinIcon />}
-                onClick={() => console.log("clicked")}
-              >
-                Play
-              </Button>
-            </Link>
-          )}
+          {active && <ProtectedPlayButton />}
         </HStack>
         <Divider colorScheme="yellow" />
         <HStack px={4} py={1} align="center" justify="space-between">

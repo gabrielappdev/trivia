@@ -1,7 +1,7 @@
 export const getRoute = (route: string, params?: string) => {
   switch (route) {
     case "contests":
-      return `/constests/${params}`;
+      return `/contests/${params}`;
     case "signin":
       return "/signin";
     case "signup":
