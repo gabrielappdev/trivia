@@ -19,6 +19,8 @@ export const getEndpoint = (endpoint) => {
       return "/auth/local/register";
     case "me":
       return "/users/me";
+    case "activeContests":
+      return "/contests?filters[active]=true&populate[0]=category";
     default:
       return "";
   }

@@ -22,7 +22,8 @@
       "@constants/*": ["constants/*"],
       "@icons/*": ["icons/*"],
       "@services/*": ["services/*"],
-      "@atoms/*": ["atoms/*"]
+      "@atoms/*": ["atoms/*"],
+      "@helpers/*": ["helpers/*"]
     }
   },
   "include": [

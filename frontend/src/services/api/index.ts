@@ -8,10 +8,12 @@ const axiosClient = axios.create({
 });
 
 axiosClient.interceptors.request.use((config) => {
-  const user = localStorage.getItem("_trivia");
-  if (user) {
-    const userObject = JSON.parse(user);
-    config.headers.Authorization = `Bearer ${userObject!.user!.jwt}`;
+  if (typeof window !== "undefined") {
+    const user = localStorage.getItem("_trivia");
+    if (user) {
+      const userObject = JSON.parse(user);
+      config.headers.Authorization = `Bearer ${userObject!.user!.jwt}`;
+    }
   }
   return config;
 });

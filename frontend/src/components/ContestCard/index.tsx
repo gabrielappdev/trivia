@@ -4,6 +4,7 @@ import {
   Divider,
   Heading,
   HStack,
+  Stack,
   Tag,
   Text,
   theme,
@@ -21,7 +22,8 @@ import { user as userAtom } from "@atoms/user";
 import { useRecoilState } from "recoil";
 import { useRouter } from "next/router";
 
-type ContestCardProps = {
+export type ContestCardProps = {
+  id: number;
   title: string;
   description: string;
   prizePool: number;
@@ -103,26 +105,45 @@ const ContestCard = ({
         filter={!active ? "grayscale(1)" : "none"}
         data-testid="contest-card-body"
       >
-        <VStack align="flex-start" w="100%" p={4} pb={0} spacing={2}>
-          <Tooltip label={title}>
-            <Heading isTruncated textAlign="left" as="h4" size="sm">
-              {title}
-            </Heading>
-          </Tooltip>
-          <Text fontSize="sm" aria-label="Contest description">
-            {description}
-          </Text>
-          <Text fontSize="sm" aria-label="Contest category">
-            <b>Category:</b> {category}
-          </Text>
-        </VStack>
-        <HStack px={4} py={2} align="center" justify="space-between">
-          <HStack spacing={2}>
-            <DifficultyTag difficulty={difficulty} />
-            <ActiveTag status={active ? "active" : "inactive"} />
+        <Stack minH="180px">
+          <VStack align="flex-start" w="100%" p={4} pb={0} spacing={2}>
+            <Tooltip label={title}>
+              <Heading
+                maxW="100%"
+                isTruncated
+                textAlign="left"
+                as="h4"
+                size="sm"
+              >
+                {title}
+              </Heading>
+            </Tooltip>
+            <Text fontSize="sm" aria-label="Contest description">
+              {description}
+            </Text>
+            <Text
+              maxW="100%"
+              isTruncated
+              fontSize="sm"
+              aria-label="Contest category"
+            >
+              <b>Category:</b> {category}
+            </Text>
+          </VStack>
+          <HStack
+            px={4}
+            py={2}
+            align="center"
+            justify="space-between"
+            marginTop="auto!important"
+          >
+            <HStack spacing={2}>
+              <DifficultyTag difficulty={difficulty} />
+              <ActiveTag status={active ? "active" : "inactive"} />
+            </HStack>
+            {active && <ProtectedPlayButton />}
           </HStack>
-          {active && <ProtectedPlayButton />}
-        </HStack>
+        </Stack>
         <Divider colorScheme="yellow" />
         <HStack px={4} py={1} align="center" justify="space-between">
           <HStack spacing={2}>

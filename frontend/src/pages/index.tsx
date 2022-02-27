@@ -1,30 +1,46 @@
-import ContestCard from "@components/ContestCard";
+import { Heading, SimpleGrid } from "@chakra-ui/react";
+import ContestCard, { ContestCardProps } from "@components/ContestCard";
 import Section from "@components/Section";
+import { getEndpoint } from "@constants/index";
+import { formatContests } from "@helpers/formatContests";
+import axiosClient from "@services/api";
 import MainTemplate from "../layouts/main";
 
-const mock = {
-  title: "Contest #1 - Animals",
-  description: "Easy contest with entrance cost of 37 coins",
-  prizePool: 0,
-  active: true,
-  expiration_date: "2022-02-28T00:17:32.362Z",
-  slug: "contest-1-animals",
-  cost: 37,
-  difficulty: "easy",
-  category: "animals",
+type IndexProps = {
+  activeContests: ContestCardProps[];
 };
 
-const Index = () => {
+const Index = ({ activeContests }: IndexProps) => {
   return (
     <MainTemplate>
       <Section
         title="Active contests"
         subtitle="Here you`ll find all active contests at the moment"
       >
-        <ContestCard {...mock} />
+        <>
+          {!activeContests?.length ? (
+            <Heading>No active contests found!</Heading>
+          ) : (
+            <SimpleGrid gap={4} columns={{ sm: 1, md: 4 }}>
+              {activeContests.map((contest) => (
+                <ContestCard key={contest.id} {...contest} />
+              ))}
+            </SimpleGrid>
+          )}
+        </>
       </Section>
     </MainTemplate>
   );
 };
+
+export async function getServerSideProps() {
+  const { data } = await axiosClient(getEndpoint("activeContests"));
+  const activeContests = formatContests(data);
+  return {
+    props: {
+      activeContests,
+    },
+  };
+}
 
 export default Index;

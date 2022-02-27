@@ -10,5 +10,6 @@ module.exports = {
     "^@icons(.*)$": "<rootDir>/src/icons$1",
     "^@services(.*)$": "<rootDir>/src/services$1",
     "^@atoms(.*)$": "<rootDir>/src/atoms$1",
+    "^@helpers(.*)$": "<rootDir>/src/helpers$1",
   },
 };
