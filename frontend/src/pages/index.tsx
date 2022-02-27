@@ -5,12 +5,30 @@ import { getEndpoint } from "@constants/index";
 import { formatContests } from "@helpers/formatContests";
 import axiosClient from "@services/api";
 import MainTemplate from "../layouts/main";
+import useSWR from "swr";
+import { useEffect, useState } from "react";
 
 type IndexProps = {
   activeContests: ContestCardProps[];
 };
 
 const Index = ({ activeContests }: IndexProps) => {
+  const [contests, setContests] = useState(activeContests);
+  const { data, error } = useSWR(
+    getEndpoint("activeContests"),
+    async (url) => {
+      const { data } = await axiosClient(url);
+      return formatContests(data);
+    },
+    { refreshInterval: 60000 }
+  );
+  useEffect(() => {
+    setContests(data);
+  }, [data?.length]);
+
+  if (error) return <div>failed to load</div>;
+  if (!data) return <div>loading...</div>;
+
   return (
     <MainTemplate>
       <Section
@@ -18,11 +36,11 @@ const Index = ({ activeContests }: IndexProps) => {
         subtitle="Here you`ll find all active contests at the moment"
       >
         <>
-          {!activeContests?.length ? (
-            <Heading>No active contests found!</Heading>
+          {!contests?.length ? (
+            <Heading color="white">No active contests found!</Heading>
           ) : (
-            <SimpleGrid gap={4} columns={{ sm: 1, md: 4 }}>
-              {activeContests.map((contest) => (
+            <SimpleGrid gap={4} columns={{ sm: 1, md: 3, lg: 4 }}>
+              {contests.map((contest) => (
                 <ContestCard key={contest.id} {...contest} />
               ))}
             </SimpleGrid>

@@ -9,6 +9,7 @@ import {
   Text,
   theme,
   Tooltip,
+  useDisclosure,
   useToast,
   VStack,
 } from "@chakra-ui/react";
@@ -21,6 +22,7 @@ import Countdown from "@components/Countdown";
 import { user as userAtom } from "@atoms/user";
 import { useRecoilState } from "recoil";
 import { useRouter } from "next/router";
+import Dialog from "@components/Dialog";
 
 export type ContestCardProps = {
   id: number;
@@ -37,6 +39,7 @@ export type ContestCardProps = {
 
 type PlayButtonProps = {
   onClick?: () => void;
+  isDisabled?: boolean;
 };
 
 const ContestCard = ({
@@ -44,18 +47,19 @@ const ContestCard = ({
   description,
   prizePool,
   expiration_date: expirationDate,
-  slug,
   difficulty,
   active,
   cost,
+  slug,
   category,
 }: ContestCardProps) => {
+  const { isOpen, onClose, onOpen } = useDisclosure();
   const [user] = useRecoilState(userAtom);
 
   const toast = useToast();
   const router = useRouter();
 
-  const PlayButton = ({ onClick }: PlayButtonProps) => {
+  const PlayButton = ({ onClick, isDisabled }: PlayButtonProps) => {
     return (
       <Button
         cursor="pointer"
@@ -63,6 +67,7 @@ const ContestCard = ({
         size="md"
         leftIcon={<CoinIcon />}
         onClick={onClick ? onClick : () => ({})}
+        isDisabled={isDisabled}
       >
         Play
       </Button>
@@ -80,14 +85,14 @@ const ContestCard = ({
       router.push(getRoute("signin"));
     };
     if (user?.id) {
-      return (
-        <Link href={getRoute("contests", slug)}>
-          <PlayButton />
-        </Link>
-      );
+      return <PlayButton isDisabled={user.coins - cost < 0} onClick={onOpen} />;
     } else {
       return <PlayButton onClick={handleUnsignewdUserClick} />;
     }
+  };
+
+  const onContinue = () => {
+    router.push(getRoute("contests", slug));
   };
 
   return (
@@ -96,6 +101,19 @@ const ContestCard = ({
       pointerEvents={active ? "auto" : "none"}
       cursor={active ? "default" : "not-allowed"}
     >
+      <Dialog
+        header="Are you sure ?"
+        body={`Are you sure that you want to play this contest ? You'll have ${
+          user?.coins - cost
+        } coins if you accepts.`}
+        isOpen={isOpen}
+        onClose={onClose}
+        footer={
+          <Button colorScheme="green" onClick={onContinue}>
+            Yes, continue!
+          </Button>
+        }
+      />
       <Box
         bg="white"
         shadow="md"
