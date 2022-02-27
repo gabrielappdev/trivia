@@ -1,8 +1,6 @@
 import { Button, HStack, Image, theme } from "@chakra-ui/react";
-
-type NavbarProps = {
-  //
-};
+import { getRoute } from "@constants/index";
+import Link from "next/link";
 
 const Navbar = () => {
   return (
@@ -23,7 +21,12 @@ const Navbar = () => {
         w="160px"
       />
       <HStack spacing={2}>
-        <Button colorScheme="yellow">Join now</Button>
+        <Link href={getRoute("signup")}>
+          <Button colorScheme="yellow">Join now</Button>
+        </Link>
+        <Link href={getRoute("signin")}>
+          <Button colorScheme="blue">Enter</Button>
+        </Link>
       </HStack>
     </HStack>
   );

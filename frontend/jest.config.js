@@ -8,5 +8,7 @@ module.exports = {
     "^@layouts(.*)$": "<rootDir>/src/layouts$1",
     "^@constants(.*)$": "<rootDir>/src/constants$1",
     "^@icons(.*)$": "<rootDir>/src/icons$1",
+    "^@services(.*)$": "<rootDir>/src/services$1",
+    "^@atoms(.*)$": "<rootDir>/src/atoms$1",
   },
 };

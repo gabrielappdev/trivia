@@ -6,7 +6,7 @@ type MainProps = {
   children: ReactChild;
 };
 
-const Main = ({ children }: MainProps) => {
+const MainTemplate = ({ children }: MainProps) => {
   return (
     <Box minH="100vh" bg={theme.colors.purple[800]}>
       <Navbar />
@@ -15,4 +15,4 @@ const Main = ({ children }: MainProps) => {
   );
 };
 
-export default Main;
+export default MainTemplate;

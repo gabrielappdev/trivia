@@ -20,7 +20,9 @@
       "@hooks/*": ["hooks/*"],
       "@layouts/*": ["layouts/*"],
       "@constants/*": ["constants/*"],
-      "@icons/*": ["icons/*"]
+      "@icons/*": ["icons/*"],
+      "@services/*": ["services/*"],
+      "@atoms/*": ["atoms/*"]
     }
   },
   "include": [
