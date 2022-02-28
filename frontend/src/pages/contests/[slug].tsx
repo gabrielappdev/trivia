@@ -1,13 +1,16 @@
 import { getEndpoint } from "@constants/index";
 import { formatContests } from "@helpers/formatContests";
-import { ContestProps } from "@types/contest";
 import axiosClient from "@services/api";
 import { user as userAtom } from "@atoms/user";
+import { contest as contestAtom } from "@atoms/contest";
+import { contestPlay as contestPlayAtom } from "@atoms/contestPlay";
 import { useRecoilState } from "recoil";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { LocalStorage } from "@services/localStorage";
 import { useToast } from "@chakra-ui/react";
+import PlayLayout from "@layouts/play";
+import { ContestProps } from "@localTypes/contest";
 
 type ContestPageProps = {
   data: ContestProps;
@@ -17,10 +20,30 @@ const localStorage = new LocalStorage();
 
 const ContestPage = ({ data }: ContestPageProps) => {
   const [user] = useRecoilState(userAtom);
+  const [_, setContest] = useRecoilState(contestAtom);
+  const [contestPlay, setContestPlay] = useRecoilState(contestPlayAtom);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const toast = useToast();
 
   useEffect(() => {
+    setContest(data);
+  }, [data]);
+
+  useEffect(() => {
+    const fetchContestPlay = async (userId) => {
+      setIsLoading(true);
+      try {
+        const { data: contestPlayData } = await axiosClient(
+          getEndpoint("contestPlay", data.id)
+        );
+        setContestPlay(contestPlayData);
+      } catch (error) {
+        //
+      } finally {
+        setIsLoading(false);
+      }
+    };
     const userToken = localStorage.getData("_trivia")?.user?.jwt;
     if (!userToken) {
       toast({
@@ -30,24 +53,15 @@ const ContestPage = ({ data }: ContestPageProps) => {
         isClosable: true,
       });
       router.push("/");
-    } else {
+    } else if (userToken && user?.id) {
+      fetchContestPlay(user.id);
     }
-  }, [user]);
+  }, [user, data]);
 
-  return <div />;
+  return <PlayLayout>{contestPlay?.id}</PlayLayout>;
 };
-export async function getStaticPaths() {
-  const { data } = await axiosClient(getEndpoint("activeContests"));
-  const contests = formatContests(data);
 
-  const paths = contests?.map(({ slug }) => ({
-    params: { slug },
-  }));
-
-  return { paths, fallback: false };
-}
-
-export async function getStaticProps({ params: { slug } }) {
+export async function getServerSideProps({ params: { slug } }) {
   const { data } = await axiosClient(getEndpoint("contest", slug));
 
   return {
@@ -56,7 +70,6 @@ export async function getStaticProps({ params: { slug } }) {
         ...data,
         category: data.category.title,
       },
-      slug,
     },
   };
 }

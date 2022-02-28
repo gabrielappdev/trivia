@@ -14,7 +14,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import CoinIcon from "@icons/Coin";
-import { getRoute } from "@constants/index";
+import { getEndpoint, getRoute } from "@constants/index";
 import Link from "next/link";
 import DifficultyTag from "./Tags/Difficulty";
 import ActiveTag from "./Tags/Active";
@@ -23,6 +23,9 @@ import { user as userAtom } from "@atoms/user";
 import { useRecoilState } from "recoil";
 import { useRouter } from "next/router";
 import Dialog from "@components/Dialog";
+import axiosClient from "@services/api";
+import { useMemo, useState } from "react";
+import { useSWRConfig } from "swr";
 
 export type ContestCardProps = {
   id: number;
@@ -35,14 +38,17 @@ export type ContestCardProps = {
   active: boolean;
   cost: number;
   category: string;
+  users: number[];
 };
 
 type PlayButtonProps = {
   onClick?: () => void;
   isDisabled?: boolean;
+  isVariant?: boolean;
 };
 
 const ContestCard = ({
+  id,
   title,
   description,
   prizePool,
@@ -52,24 +58,43 @@ const ContestCard = ({
   cost,
   slug,
   category,
+  users,
 }: ContestCardProps) => {
+  const { mutate } = useSWRConfig();
+
   const { isOpen, onClose, onOpen } = useDisclosure();
   const [user] = useRecoilState(userAtom);
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const toast = useToast();
   const router = useRouter();
 
-  const PlayButton = ({ onClick, isDisabled }: PlayButtonProps) => {
+  const isAlreadyRegistered = useMemo(() => {
+    return !user?.id ? false : users.includes(user?.id);
+  }, [users, user]);
+
+  const handleClose = () => {
+    if (!isLoading) {
+      onClose();
+    }
+  };
+
+  const onProceed = () => {
+    router.push(getRoute("contests", slug));
+  };
+
+  const PlayButton = ({ onClick, isDisabled, isVariant }: PlayButtonProps) => {
     return (
       <Button
         cursor="pointer"
-        colorScheme="yellow"
+        colorScheme={isVariant ? "blue" : "yellow"}
         size="md"
-        leftIcon={<CoinIcon />}
+        leftIcon={isVariant ? null : <CoinIcon />}
         onClick={onClick ? onClick : () => ({})}
         isDisabled={isDisabled}
       >
-        Play
+        {isVariant ? "Proceed" : "Play"}
       </Button>
     );
   };
@@ -85,14 +110,47 @@ const ContestCard = ({
       router.push(getRoute("signin"));
     };
     if (user?.id) {
-      return <PlayButton isDisabled={user.coins - cost < 0} onClick={onOpen} />;
+      return (
+        <PlayButton
+          isVariant={isAlreadyRegistered}
+          isDisabled={user.coins - cost < 0}
+          onClick={isAlreadyRegistered ? onProceed : onOpen}
+        />
+      );
     } else {
       return <PlayButton onClick={handleUnsignewdUserClick} />;
     }
   };
 
-  const onContinue = () => {
-    router.push(getRoute("contests", slug));
+  const onContinue = async () => {
+    setIsLoading(true);
+    try {
+      const { data } = await axiosClient.post(
+        getEndpoint("registerContestant"),
+        { id }
+      );
+      if (data?.error) {
+        toast({
+          title: data.error,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      } else {
+        mutate(getRoute("activeContests"));
+        router.push(getRoute("contests", slug));
+      }
+    } catch (error) {
+      toast({
+        title:
+          error?.response?.data?.error?.message ?? error?.response?.data?.error,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -107,9 +165,13 @@ const ContestCard = ({
           user?.coins - cost
         } coins if you accepts.`}
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleClose}
         footer={
-          <Button colorScheme="green" onClick={onContinue}>
+          <Button
+            isLoading={isLoading}
+            colorScheme="green"
+            onClick={onContinue}
+          >
             Yes, continue!
           </Button>
         }

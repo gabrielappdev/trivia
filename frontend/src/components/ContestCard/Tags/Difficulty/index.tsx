@@ -17,7 +17,7 @@ const difficultyTagTransformer = {
 
 type DifficultyTagProps = {
   size?: "xs" | "sm" | "md" | "lg" | "xl";
-  difficulty: "easy" | "medium" | "hard";
+  difficulty: string;
 };
 
 const DifficultyTag = ({ difficulty, size = "md" }: DifficultyTagProps) => {

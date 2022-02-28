@@ -4,5 +4,6 @@ export const formatContests = (contests) => {
     ...attributes,
     id,
     category: attributes?.category?.data?.attributes?.title ?? "",
+    users: attributes?.users_permissions_users?.data?.map(({ id }) => id),
   }));
 };

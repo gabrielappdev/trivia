@@ -57,7 +57,6 @@ const Navbar = () => {
   );
 
   useEffect(() => {
-    console.log(data);
     if (data?.id) {
       setUser(data);
     }
