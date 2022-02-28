@@ -15,26 +15,26 @@ const Countdown = ({ date, children, prefix, size = "md" }) => {
       return children;
     } else {
       const getDate = (hasDays, hasHours) => {
-        seconds = seconds >= 10 ? seconds : `0${seconds}`;
-        hours = hours >= 10 ? hours : `0${hours}`;
-        minutes = minutes >= 10 ? minutes : `0${minutes}`;
-        days = days >= 10 ? days : `0${days}`;
+        seconds = seconds >= 10 ? `${seconds}s` : `0${seconds}` + "s";
+        hours = hours >= 10 ? `${hours}h` : `0${hours}` + "h";
+        minutes = minutes >= 10 ? `${minutes}m` : `0${minutes}` + "m";
+        days = days >= 10 ? `${days}d` : `0${days}` + "d";
         if (hasDays) {
           return (
             <span>
-              {days}:{hours}:{minutes}:{seconds}
+              {days} {hours} {minutes} {seconds}
             </span>
           );
         } else if (hasHours) {
           return (
             <span>
-              {hours}:{minutes}:{seconds}
+              {hours} {minutes} {seconds}
             </span>
           );
         }
         return (
           <span>
-            {minutes}:{seconds}
+            {minutes} {seconds}
           </span>
         );
       };

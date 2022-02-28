@@ -70,9 +70,7 @@ const ContestCard = ({
   const toast = useToast();
   const router = useRouter();
 
-  const isAlreadyRegistered = useMemo(() => {
-    return !user?.id ? false : users.includes(user?.id);
-  }, [users, user]);
+  const isAlreadyRegistered = users?.includes(user?.id);
 
   const handleClose = () => {
     if (!isLoading) {
@@ -225,7 +223,7 @@ const ContestCard = ({
           </HStack>
         </Stack>
         <Divider colorScheme="yellow" />
-        <HStack px={4} py={1} align="center" justify="space-between">
+        <HStack px={2} py={1} align="center" justify="space-between">
           <HStack spacing={2}>
             <HStack spacing={2} data-testid="cost">
               <CoinIcon />
@@ -236,7 +234,7 @@ const ContestCard = ({
               <Text fontSize="sm">Pool: {prizePool}</Text>
             </HStack>
           </HStack>
-          <Countdown size="xs" prefix="ends in:" date={expirationDate}>
+          <Countdown size="xs" prefix="" date={expirationDate}>
             closed
           </Countdown>
         </HStack>

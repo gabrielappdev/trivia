@@ -1,19 +1,20 @@
-import { Box, Heading, SimpleGrid, Skeleton } from "@chakra-ui/react";
-import ContestCard, { ContestCardProps } from "@components/ContestCard";
+import {
+  Box,
+  Button,
+  Heading,
+  SimpleGrid,
+  Skeleton,
+  Stack,
+} from "@chakra-ui/react";
+import ContestCard from "@components/ContestCard";
 import Section from "@components/Section";
 import { getEndpoint } from "@constants/index";
 import { formatContests } from "@helpers/formatContests";
 import axiosClient from "@services/api";
 import MainTemplate from "../layouts/main";
 import useSWR from "swr";
-import { useEffect, useState } from "react";
 
-type IndexProps = {
-  activeContests: ContestCardProps[];
-};
-
-const Index = ({ activeContests }: IndexProps) => {
-  const [contests, setContests] = useState(activeContests);
+const Index = () => {
   const { data, error } = useSWR(
     getEndpoint("activeContests"),
     async (url) => {
@@ -22,12 +23,9 @@ const Index = ({ activeContests }: IndexProps) => {
     },
     { refreshInterval: 60000 * 30 }
   );
-  useEffect(() => {
-    setContests(data);
-  }, [data?.length]);
 
   if (error) return <div>failed to load</div>;
-  if (!data || !contests)
+  if (!data) {
     return (
       <MainTemplate>
         <Box py="100px">
@@ -39,6 +37,7 @@ const Index = ({ activeContests }: IndexProps) => {
         </Box>
       </MainTemplate>
     );
+  }
 
   return (
     <MainTemplate>
@@ -47,11 +46,11 @@ const Index = ({ activeContests }: IndexProps) => {
         subtitle="Here you`ll find all active contests at the moment"
       >
         <>
-          {!contests?.length ? (
+          {!data?.length ? (
             <Heading color="white">No active contests found!</Heading>
           ) : (
             <SimpleGrid gap={4} columns={{ sm: 1, md: 3, lg: 4 }}>
-              {contests.map((contest) => (
+              {data.map((contest) => (
                 <ContestCard key={contest.id} {...contest} />
               ))}
             </SimpleGrid>
@@ -61,15 +60,5 @@ const Index = ({ activeContests }: IndexProps) => {
     </MainTemplate>
   );
 };
-
-export async function getServerSideProps() {
-  const { data } = await axiosClient(getEndpoint("activeContests"));
-  const activeContests = formatContests(data);
-  return {
-    props: {
-      activeContests,
-    },
-  };
-}
 
 export default Index;

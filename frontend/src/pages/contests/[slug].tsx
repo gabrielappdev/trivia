@@ -1,16 +1,17 @@
-import { getEndpoint } from "@constants/index";
-import { formatContests } from "@helpers/formatContests";
+import { getEndpoint, getRoute } from "@constants/index";
 import axiosClient from "@services/api";
 import { user as userAtom } from "@atoms/user";
 import { contest as contestAtom } from "@atoms/contest";
 import { contestPlay as contestPlayAtom } from "@atoms/contestPlay";
 import { useRecoilState } from "recoil";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { LocalStorage } from "@services/localStorage";
 import { useToast } from "@chakra-ui/react";
 import PlayLayout from "@layouts/play";
 import { ContestProps } from "@localTypes/contest";
+import PlayContest from "@components/PlayContest";
+import { useSWRConfig } from "swr";
 
 type ContestPageProps = {
   data: ContestProps;
@@ -20,19 +21,20 @@ const localStorage = new LocalStorage();
 
 const ContestPage = ({ data }: ContestPageProps) => {
   const [user] = useRecoilState(userAtom);
-  const [_, setContest] = useRecoilState(contestAtom);
-  const [contestPlay, setContestPlay] = useRecoilState(contestPlayAtom);
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setContest] = useRecoilState(contestAtom);
+  const [, setContestPlay] = useRecoilState(contestPlayAtom);
   const router = useRouter();
   const toast = useToast();
 
+  const { mutate } = useSWRConfig();
+
   useEffect(() => {
     setContest(data);
+    mutate(getRoute("activeContests"));
   }, [data]);
 
   useEffect(() => {
     const fetchContestPlay = async (userId) => {
-      setIsLoading(true);
       try {
         const { data: contestPlayData } = await axiosClient(
           getEndpoint("contestPlay", data.id)
@@ -40,8 +42,6 @@ const ContestPage = ({ data }: ContestPageProps) => {
         setContestPlay(contestPlayData);
       } catch (error) {
         //
-      } finally {
-        setIsLoading(false);
       }
     };
     const userToken = localStorage.getData("_trivia")?.user?.jwt;
@@ -58,7 +58,11 @@ const ContestPage = ({ data }: ContestPageProps) => {
     }
   }, [user, data]);
 
-  return <PlayLayout>{contestPlay?.id}</PlayLayout>;
+  return (
+    <PlayLayout>
+      <PlayContest contest={data} />
+    </PlayLayout>
+  );
 };
 
 export async function getServerSideProps({ params: { slug } }) {

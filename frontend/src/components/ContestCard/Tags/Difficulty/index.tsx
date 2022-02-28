@@ -16,7 +16,7 @@ const difficultyTagTransformer = {
 };
 
 type DifficultyTagProps = {
-  size?: "xs" | "sm" | "md" | "lg" | "xl";
+  size?: "sm" | "md" | "lg";
   difficulty: string;
 };
 

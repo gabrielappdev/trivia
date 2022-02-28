@@ -91,7 +91,7 @@ const PlayTemplate = ({ children }: PlayTemplateProps) => {
         <Heading size="sm" color="white">
           {contest.title}
         </Heading>
-        <DifficultyTag difficulty={contest.difficulty}></DifficultyTag>
+        <DifficultyTag difficulty={contest.difficulty} />
         <HStack spacing={2}>
           <Text fontSize="md" color="white">
             Prize:
@@ -115,7 +115,12 @@ const PlayTemplate = ({ children }: PlayTemplateProps) => {
       >
         {getPlayContestHeader()}
       </Box>
-      <Container centerContent justifyContent="center" minH="inherit">
+      <Container
+        maxW="container.xl"
+        centerContent
+        justifyContent="center"
+        minH="inherit"
+      >
         {children}
       </Container>
     </Box>

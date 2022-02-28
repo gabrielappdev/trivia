@@ -12,7 +12,7 @@ const activeTagTransformer = {
 };
 
 type ActiveTagProps = {
-  size?: "xs" | "sm" | "md" | "lg" | "xl";
+  size?: "sm" | "md" | "lg";
   status: "active" | "inactive";
 };
 
