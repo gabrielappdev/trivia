@@ -53,7 +53,7 @@ const Navbar = () => {
       const token = localStorage.getData("_trivia")?.user?.jwt;
       return { ...data, jwt: token };
     },
-    { refreshInterval: 120000 }
+    { refreshInterval: 60000 * 30 }
   );
 
   useEffect(() => {

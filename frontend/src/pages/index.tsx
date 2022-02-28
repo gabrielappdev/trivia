@@ -20,7 +20,7 @@ const Index = ({ activeContests }: IndexProps) => {
       const { data } = await axiosClient(url);
       return formatContests(data);
     },
-    { refreshInterval: 60000 }
+    { refreshInterval: 60000 * 30 }
   );
   useEffect(() => {
     setContests(data);

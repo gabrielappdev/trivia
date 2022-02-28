@@ -23,7 +23,8 @@
       "@icons/*": ["icons/*"],
       "@services/*": ["services/*"],
       "@atoms/*": ["atoms/*"],
-      "@helpers/*": ["helpers/*"]
+      "@helpers/*": ["helpers/*"],
+      "@types/*": ["types/*"]
     }
   },
   "include": [

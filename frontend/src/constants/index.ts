@@ -11,7 +11,7 @@ export const getRoute = (route: string, params?: string) => {
   }
 };
 
-export const getEndpoint = (endpoint) => {
+export const getEndpoint = (endpoint: string, params?: string) => {
   switch (endpoint) {
     case "signin":
       return "/auth/local/";
@@ -21,6 +21,8 @@ export const getEndpoint = (endpoint) => {
       return "/users/me";
     case "activeContests":
       return "/contests?filters[active]=true&populate[0]=category";
+    case "contest":
+      return `/contest/${params}`;
     default:
       return "";
   }
