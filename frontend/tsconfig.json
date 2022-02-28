@@ -24,7 +24,7 @@
       "@services/*": ["services/*"],
       "@atoms/*": ["atoms/*"],
       "@helpers/*": ["helpers/*"],
-      "@types/*": ["types/*"]
+      "@localTypes/*": ["types/*"]
     }
   },
   "include": [

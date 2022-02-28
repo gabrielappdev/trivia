@@ -12,5 +12,6 @@ module.exports = {
     "^@atoms(.*)$": "<rootDir>/src/atoms$1",
     "^@helpers(.*)$": "<rootDir>/src/helpers$1",
     "^@tests(.*)$": "<rootDir>/src/tests$1",
+    "^@localTypes(.*)$": "<rootDir>/src/types$1",
   },
 };
