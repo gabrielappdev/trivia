@@ -1,6 +1,6 @@
 export type AnswersProps = {
-  type: string;
   questions: string[];
+  type: string;
 };
 
 export type QuestionProps = {
@@ -8,6 +8,6 @@ export type QuestionProps = {
   title: string;
   createdAt: string;
   updatedAt: string;
-  answers: AnswersProps[];
+  answers: AnswersProps;
   difficulty: string;
 };

@@ -116,7 +116,7 @@ const PlayTemplate = ({ children }: PlayTemplateProps) => {
         {getPlayContestHeader()}
       </Box>
       <Container
-        maxW="container.xl"
+        maxW="container.lg"
         centerContent
         justifyContent="center"
         minH="inherit"
