@@ -1,79 +1,101 @@
 import { getEndpoint, getRoute } from "@constants/index";
 import axiosClient from "@services/api";
-import { user as userAtom } from "@atoms/user";
 import { contest as contestAtom } from "@atoms/contest";
-import { contestPlay as contestPlayAtom } from "@atoms/contestPlay";
 import { useRecoilState } from "recoil";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
-import { LocalStorage } from "@services/localStorage";
-import { useToast } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 import PlayLayout from "@layouts/play";
-import { ContestProps } from "@localTypes/contest";
 import PlayContest from "@components/PlayContest";
-import { useSWRConfig } from "swr";
+import useSWR, { useSWRConfig } from "swr";
+import ContestResult from "@components/ContestResult";
+import { ContestResultProps } from "@localTypes/result";
+import {
+  Box,
+  CircularProgress,
+  Container,
+  Skeleton,
+  theme,
+} from "@chakra-ui/react";
+import { useRouter } from "next/router";
+import { contestFinish as contestFinishAtom } from "@atoms/contestFinish";
 
 type ContestPageProps = {
-  data: ContestProps;
+  slug: string;
 };
 
-const localStorage = new LocalStorage();
-
-const ContestPage = ({ data }: ContestPageProps) => {
-  const [user] = useRecoilState(userAtom);
-  const [, setContest] = useRecoilState(contestAtom);
-  const [, setContestPlay] = useRecoilState(contestPlayAtom);
+const ContestPage = ({ slug }: ContestPageProps) => {
   const router = useRouter();
-  const toast = useToast();
+  const [, setContest] = useRecoilState(contestAtom);
+  const [result, setResult] = useState(null);
+
+  const [, setContestFinish] = useRecoilState(contestFinishAtom);
 
   const { mutate } = useSWRConfig();
 
+  const { data, error } = useSWR(
+    getEndpoint("contest", slug),
+    async (url) => {
+      const { data } = await axiosClient(url);
+      return {
+        ...data,
+        category: data.category,
+      };
+    },
+    { refreshInterval: 20000 }
+  );
+
   useEffect(() => {
-    setContest(data);
+    if (data) {
+      setContest(data);
+    }
     mutate(getRoute("activeContests"));
   }, [data]);
 
-  useEffect(() => {
-    const fetchContestPlay = async (userId) => {
-      try {
-        const { data: contestPlayData } = await axiosClient(
-          getEndpoint("contestPlay", data.id)
-        );
-        setContestPlay(contestPlayData);
-      } catch (error) {
-        //
-      }
-    };
-    const userToken = localStorage.getData("_trivia")?.user?.jwt;
-    if (!userToken) {
-      toast({
-        title: `You must be signed to access this page`,
-        status: "warning",
-        duration: 3000,
-        isClosable: true,
-      });
-      router.push("/");
-    } else if (userToken && user?.id) {
-      fetchContestPlay(user.id);
-    }
-  }, [user, data]);
+  if (error) {
+    router.push("/");
+  }
 
-  return (
-    <PlayLayout>
-      <PlayContest contest={data} />
-    </PlayLayout>
-  );
+  if (!data) {
+    return (
+      <Box backgroundColor={`rgba(85, 60, 154, 0.92)`} w="100%" minH="100vh">
+        <Box
+          w="inherit"
+          position="fixed"
+          p={4}
+          borderBottom={`1px solid ${theme.colors.yellow[400]}`}
+        >
+          <Skeleton w="400px" h="40px" />
+        </Box>
+        <Container
+          maxW="container.lg"
+          centerContent
+          justifyContent="center"
+          minH="inherit"
+        >
+          <CircularProgress isIndeterminate />
+        </Container>
+      </Box>
+    );
+  }
+
+  const onFinish = (data: ContestResultProps) => {
+    setResult(data);
+    setContestFinish(true);
+  };
+
+  const getContentPlayBody = () => {
+    if (result) {
+      return <ContestResult data={result} />;
+    }
+    return <PlayContest onFinish={onFinish} contest={data} />;
+  };
+
+  return <PlayLayout>{getContentPlayBody()}</PlayLayout>;
 };
 
 export async function getServerSideProps({ params: { slug } }) {
-  const { data } = await axiosClient(getEndpoint("contest", slug));
-
   return {
     props: {
-      data: {
-        ...data,
-        category: data.category.title,
-      },
+      slug,
     },
   };
 }

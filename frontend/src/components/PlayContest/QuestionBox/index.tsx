@@ -9,12 +9,13 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { QuestionProps } from "@localTypes/question";
-import { ReactChild, useEffect, useState } from "react";
+import { ReactChild } from "react";
 import { useFormContext } from "react-hook-form";
 
 type QuestionBoxProps = {
   question: QuestionProps;
-  onChange: (value) => void;
+  value: string;
+  setValue: (value) => void;
   index: number;
 };
 
@@ -46,29 +47,32 @@ const AnswerBody = ({ AnswerComponent }: AnswerBodyProps) => {
   );
 };
 
-const QuestionBox = ({ question, onChange, index }: QuestionBoxProps) => {
+const QuestionBox = ({
+  question,
+  setValue,
+  value,
+  index,
+}: QuestionBoxProps) => {
   const {
     id,
     title,
     answers: { questions: answerQuestions, type },
   } = question;
 
-  const [value, setValue] = useState(null);
-
-  useEffect(() => {
-    onChange(value);
-  }, [value]);
-
   const getAnswers = () => {
     if (type === "multiple") {
       return (
-        <RadioGroup onChange={setValue} name={`question-${index}`}>
+        <RadioGroup
+          value={value}
+          onChange={setValue}
+          name={`question-${index}`}
+        >
           <VStack w="100%" spacing={4}>
             {answerQuestions.map((answer, index) => (
               <AnswerBody
                 key={index}
                 AnswerComponent={
-                  <Radio size="lg" value={`${index}`}>
+                  <Radio colorScheme="purple" size="lg" value={`${index}`}>
                     <Text
                       w="100%"
                       fontSize="md"

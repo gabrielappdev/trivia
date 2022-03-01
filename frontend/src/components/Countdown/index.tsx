@@ -1,52 +1,71 @@
-import { Text, VStack } from "@chakra-ui/react";
+import { Heading, Text, VStack } from "@chakra-ui/react";
 import { ReactChild } from "react";
 import ReactCountdown from "react-countdown";
 
-type Countdown = {
-  date: string;
-  children: ReactChild;
+type CountdownProps = {
+  date: string | number;
+  children?: ReactChild;
   prefix?: string;
-  size: "xs" | "sm" | "md" | "lg" | "xl";
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
+  color?: string;
+  onComplete?: () => void;
+  RenderComponent?: any;
 };
 
-const Countdown = ({ date, children, prefix, size = "md" }) => {
+const Countdown = ({
+  date,
+  children,
+  prefix,
+  size = "md",
+  color = "white",
+  onComplete = () => ({}),
+}: CountdownProps) => {
   const renderer = ({ days, hours, minutes, seconds, completed }) => {
     if (completed) {
-      return children;
+      return children ?? null;
     } else {
-      const getDate = (hasDays, hasHours) => {
+      const getDate = (hasDays, hasHours, hasMinutes) => {
         seconds = seconds >= 10 ? `${seconds}s` : `0${seconds}` + "s";
         hours = hours >= 10 ? `${hours}h` : `0${hours}` + "h";
         minutes = minutes >= 10 ? `${minutes}m` : `0${minutes}` + "m";
         days = days >= 10 ? `${days}d` : `0${days}` + "d";
         if (hasDays) {
           return (
-            <span>
+            <Heading size={size} color={color}>
               {days} {hours} {minutes} {seconds}
-            </span>
+            </Heading>
           );
         } else if (hasHours) {
           return (
-            <span>
+            <Heading size={size} color={color}>
               {hours} {minutes} {seconds}
-            </span>
+            </Heading>
+          );
+        }
+        if (hasMinutes) {
+          return (
+            <Heading size={size} color={color}>
+              {minutes} {seconds}
+            </Heading>
           );
         }
         return (
-          <span>
-            {minutes} {seconds}
-          </span>
+          <Heading size={size} color={color}>
+            {seconds}
+          </Heading>
         );
       };
       return (
         <VStack spacing={0} align="flex-start">
           {prefix && <Text fontSize={size}>{prefix}</Text>}
-          <Text fontSize={size}>{getDate(days > 0, hours > 0)}</Text>
+          {getDate(days > 0, hours > 0, minutes > 0)}
         </VStack>
       );
     }
   };
-  return <ReactCountdown date={date} renderer={renderer} />;
+  return (
+    <ReactCountdown onComplete={onComplete} date={date} renderer={renderer} />
+  );
 };
 
 export default Countdown;

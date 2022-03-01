@@ -1,5 +1,7 @@
 export const getRoute = (route: string, params?: string) => {
   switch (route) {
+    case "home":
+      return "/";
     case "contests":
       return `/contests/${params}`;
     case "signin":
@@ -25,8 +27,14 @@ export const getEndpoint = (endpoint: string, params?: string | number) => {
       return `/contest/${params}`;
     case "contestPlay":
       return `/play-contest/${params}`;
+    case "contestPlayPut":
+      return `/contest-plays/${params}`;
     case "registerContestant":
       return "/register-contestant";
+    case "onLost":
+      return "/contest-lost";
+    case "checkAnswers":
+      return `/check-answers/${params}`;
     default:
       return "";
   }

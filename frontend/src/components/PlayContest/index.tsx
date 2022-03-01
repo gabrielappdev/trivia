@@ -1,19 +1,48 @@
-import { Box, Button, Heading, Stack, Text, theme } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  HStack,
+  Progress,
+  Stack,
+  Text,
+  theme,
+  useMediaQuery,
+} from "@chakra-ui/react";
 import { ContestProps } from "@localTypes/contest";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { useRecoilState } from "recoil";
+import { question as questionAtom } from "@atoms/question";
+import { timer as timerAtom } from "@atoms/timer";
+import { user as userAtom } from "@atoms/user";
+import { contestPlay as contestPlayAtom } from "@atoms/contestPlay";
 import QuestionBox from "./QuestionBox";
+import axiosClient from "@services/api";
+import { getEndpoint } from "@constants/index";
+import { LocalStorage } from "@services/localStorage";
+import { ContestResultProps } from "@localTypes/result";
 
 type PlayContestProps = {
   contest: ContestProps;
+  onFinish: (data: ContestResultProps) => void;
 };
 
 type FormAnswerProps = {
-  questions: string;
+  questions: { answer: string };
 };
 
-const PlayContest = ({ contest }: PlayContestProps) => {
+const localStorage = new LocalStorage();
+
+const PlayContest = ({ contest, onFinish }: PlayContestProps) => {
+  const [isMobile] = useMediaQuery("(max-width: 799px)");
   const questions = contest.questions;
+  const [contestPlay] = useRecoilState(contestPlayAtom);
+  const [user] = useRecoilState(userAtom);
+  const [, setQuestion] = useRecoilState(questionAtom);
+  const [, setTimer] = useRecoilState(timerAtom);
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [answer, setAnswer] = useState(null);
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [currentQuestion, setCurrentQuestion] = useState(
@@ -22,30 +51,92 @@ const PlayContest = ({ contest }: PlayContestProps) => {
 
   const methods = useForm<FormAnswerProps>({
     defaultValues: {
-      questions: "",
+      questions: { answer: "" },
     },
-    reValidateMode: "onChange",
   });
 
-  const onSubmit = async (data: FormAnswerProps) => {
-    const { setError, setValue } = methods;
-    if (!data.questions) {
+  useEffect(() => {
+    return () => {
+      setIsSaving(false);
+      setCurrentQuestion(null);
+      setCurrentQuestionIndex(0);
+    };
+  }, []);
+
+  const onSubmit = async () => {
+    const { setError, clearErrors } = methods;
+    if (!answer) {
       setError("questions", { type: "focus" }, { shouldFocus: true });
     } else {
-      if (currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestion(questions[currentQuestionIndex + 1]);
-        setCurrentQuestionIndex((prevState) => prevState + 1);
-        setValue("questions", null);
+      clearErrors("questions");
+      setIsSaving(true);
+      setQuestion({ requestWasSent: true });
+      try {
+        const response = await axiosClient.put(
+          getEndpoint("contestPlayPut", contestPlay.id),
+          {
+            data: {
+              step: currentQuestionIndex + 1,
+            },
+          }
+        );
+        if (response.status === 200) {
+          if (currentQuestionIndex < questions.length - 1) {
+            let currentAnswers = [];
+            const storedAnswers = localStorage.getData(
+              `${user.email}-contest-${contest.id}-answers`
+            );
+            if (storedAnswers?.answers) {
+              currentAnswers = storedAnswers.answers;
+            }
+            let sendAnswer = "";
+            if (questions[currentQuestionIndex].answers.type === "multiple") {
+              sendAnswer =
+                questions[currentQuestionIndex].answers.questions[
+                  Number(answer)
+                ];
+            } else {
+              sendAnswer = answer;
+            }
+            localStorage.setData(
+              `${user.email}-contest-${contest.id}-answers`,
+              { answers: [...currentAnswers, answer] }
+            );
+            setCurrentQuestion(questions[currentQuestionIndex + 1]);
+            setCurrentQuestionIndex((prevState) => prevState + 1);
+            setTimer(null);
+
+            setAnswer(null);
+          } else {
+            const allAnswers = localStorage.getData(
+              `${user.email}-contest-${contest.id}-answers`
+            )?.answers;
+            const { data } = await axiosClient.post(
+              getEndpoint("checkAnswers", contest.id),
+              { data: allAnswers }
+            );
+            onFinish(data);
+            localStorage.setData(
+              `${user.email}-contest-${contest.id}-answers`,
+              { answers: [] }
+            );
+          }
+        }
+      } catch (error) {
+        //
+      } finally {
+        setIsSaving(false);
+        setQuestion({ requestWasSent: false });
       }
     }
   };
 
   const onChange = (value: string) => {
-    const { setValue, clearErrors } = methods;
+    const { clearErrors } = methods;
+    setAnswer(value);
     if (value) {
       clearErrors("questions");
     }
-    setValue("questions", value);
   };
 
   return (
@@ -54,28 +145,43 @@ const PlayContest = ({ contest }: PlayContestProps) => {
       _hover={{ shadow: "lg" }}
       borderRadius={8}
       p={6}
-      minH="50vh"
+      h={isMobile ? "80vh" : "60vh"}
       w="100%"
       bg="white"
     >
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit)}>
-          <QuestionBox
-            index={currentQuestionIndex}
-            onChange={onChange}
-            question={currentQuestion}
-          />
-          <Button
-            type="submit"
-            h="60px"
-            colorScheme="purple"
-            w="100%"
-            size="lg"
-            sx={{ color: theme.colors.yellow[300], fontSize: "1.2rem" }}
-            mt={4}
-          >
-            Answer
-          </Button>
+        <form
+          style={{ height: "100%" }}
+          onSubmit={methods.handleSubmit(onSubmit)}
+        >
+          <Stack h="100%" justify="space-between">
+            <Progress
+              colorScheme="purple"
+              borderRadius="50px"
+              hasStripe
+              value={((currentQuestionIndex + 1) / questions.length) * 100}
+            />
+            <QuestionBox
+              index={currentQuestionIndex}
+              setValue={onChange}
+              value={answer}
+              question={currentQuestion}
+            />
+            <Button
+              type="submit"
+              h="60px"
+              colorScheme="purple"
+              w="100%"
+              size="lg"
+              sx={{ color: theme.colors.yellow[300], fontSize: "1.2rem" }}
+              isLoading={isSaving}
+              loadingText="Saving"
+            >
+              {currentQuestionIndex < questions.length - 1
+                ? "Answer"
+                : "Send answers"}
+            </Button>
+          </Stack>
         </form>
       </FormProvider>
     </Box>

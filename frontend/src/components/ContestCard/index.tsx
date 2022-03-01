@@ -44,7 +44,6 @@ export type ContestCardProps = {
 type PlayButtonProps = {
   onClick?: () => void;
   isDisabled?: boolean;
-  isVariant?: boolean;
 };
 
 const ContestCard = ({
@@ -58,7 +57,6 @@ const ContestCard = ({
   cost,
   slug,
   category,
-  users,
 }: ContestCardProps) => {
   const { mutate } = useSWRConfig();
 
@@ -70,29 +68,23 @@ const ContestCard = ({
   const toast = useToast();
   const router = useRouter();
 
-  const isAlreadyRegistered = users?.includes(user?.id);
-
   const handleClose = () => {
     if (!isLoading) {
       onClose();
     }
   };
 
-  const onProceed = () => {
-    router.push(getRoute("contests", slug));
-  };
-
-  const PlayButton = ({ onClick, isDisabled, isVariant }: PlayButtonProps) => {
+  const PlayButton = ({ onClick, isDisabled }: PlayButtonProps) => {
     return (
       <Button
         cursor="pointer"
-        colorScheme={isVariant ? "blue" : "yellow"}
+        colorScheme="yellow"
         size="md"
-        leftIcon={isVariant ? null : <CoinIcon />}
+        leftIcon={<CoinIcon />}
         onClick={onClick ? onClick : () => ({})}
         isDisabled={isDisabled}
       >
-        {isVariant ? "Proceed" : "Play"}
+        Play
       </Button>
     );
   };
@@ -108,13 +100,7 @@ const ContestCard = ({
       router.push(getRoute("signin"));
     };
     if (user?.id) {
-      return (
-        <PlayButton
-          isVariant={isAlreadyRegistered}
-          isDisabled={user.coins - cost < 0}
-          onClick={isAlreadyRegistered ? onProceed : onOpen}
-        />
-      );
+      return <PlayButton isDisabled={user.coins - cost < 0} onClick={onOpen} />;
     } else {
       return <PlayButton onClick={handleUnsignewdUserClick} />;
     }
@@ -184,7 +170,7 @@ const ContestCard = ({
         data-testid="contest-card-body"
       >
         <Stack minH="180px">
-          <VStack align="flex-start" w="100%" p={4} pb={0} spacing={2}>
+          <VStack align="flex-start" w="100%" p={2} pb={0} spacing={2}>
             <Tooltip label={title}>
               <Heading
                 maxW="100%"
@@ -207,10 +193,13 @@ const ContestCard = ({
             >
               <b>Category:</b> {category}
             </Text>
+            <HStack data-testid="cost">
+              <CoinIcon />
+              <Text fontSize="sm">Enter cost: {cost}</Text>
+            </HStack>
           </VStack>
           <HStack
-            px={4}
-            py={2}
+            p={2}
             align="center"
             justify="space-between"
             marginTop="auto!important"
@@ -225,16 +214,12 @@ const ContestCard = ({
         <Divider colorScheme="yellow" />
         <HStack px={2} py={1} align="center" justify="space-between">
           <HStack spacing={2}>
-            <HStack spacing={2} data-testid="cost">
-              <CoinIcon />
-              <Text fontSize="sm">Cost: {cost}</Text>
-            </HStack>
             <HStack spacing={2} data-testid="pool">
               <CoinIcon />
               <Text fontSize="sm">Pool: {prizePool}</Text>
             </HStack>
           </HStack>
-          <Countdown size="xs" prefix="" date={expirationDate}>
+          <Countdown size="xs" prefix="" color="black" date={expirationDate}>
             closed
           </Countdown>
         </HStack>
