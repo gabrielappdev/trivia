@@ -113,6 +113,10 @@ module.exports = createCoreController("api::contest.contest", ({ strapi }) => ({
           .service("api::contest.contest")
           .closeContest(contestId, ctx.state.user.id);
         isWinner = true;
+      } else {
+        await strapi
+          .service("api::contest.contest")
+          .onPlayerLost(ctx.state.user.id, contestId);
       }
       ctx.body = {
         ...result,
@@ -130,5 +134,23 @@ module.exports = createCoreController("api::contest.contest", ({ strapi }) => ({
     ctx.body = {
       contest,
     };
+  },
+  async onPlayerLost(ctx) {
+    const { contestId } = ctx.request.body.data;
+    if (!contestId) {
+      ctx.status = 404;
+      ctx.body = {
+        error: "Contest is missing",
+      };
+    }
+    try {
+      const result = await strapi
+        .service("api::contest.contest")
+        .onPlayerLost(ctx.state.user.id, contestId);
+
+      ctx.body = result;
+    } catch (error) {
+      return { error: error.message };
+    }
   },
 }));

@@ -25,5 +25,10 @@ module.exports = {
       path: "/contest/:slug",
       handler: "contest.findBySlug",
     },
+    {
+      method: "POST",
+      path: `/contest-lost`,
+      handler: "contest.onPlayerLost",
+    },
   ],
 };

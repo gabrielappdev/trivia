@@ -1,0 +1,30 @@
+{
+  "kind": "collectionType",
+  "collectionName": "contest_plays",
+  "info": {
+    "singularName": "contest-play",
+    "pluralName": "contest-plays",
+    "displayName": "contest_play",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "contest": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::contest.contest"
+    },
+    "users_permissions_user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "contest_plays"
+    },
+    "step": {
+      "type": "integer"
+    }
+  }
+}

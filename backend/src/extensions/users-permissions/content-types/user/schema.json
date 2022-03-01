@@ -67,6 +67,12 @@
       "type": "integer",
       "default": 200,
       "min": 0
+    },
+    "contest_plays": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::contest-play.contest-play",
+      "mappedBy": "users_permissions_user"
     }
   }
 }

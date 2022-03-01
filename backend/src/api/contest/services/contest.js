@@ -73,6 +73,8 @@ module.exports = createCoreService("api::contest.contest", ({ strapi }) => ({
         },
       });
 
+      await this.onPlayerLost(winnerId, contestId);
+
       return { contest: updatedContest, winner: updatedContestant };
     } catch (error) {
       throw new Error(error);
@@ -121,6 +123,15 @@ module.exports = createCoreService("api::contest.contest", ({ strapi }) => ({
           data: { coins: contestant.coins - contest.cost },
         });
 
+      const contestPlay = await strapi
+        .query("api::contest-play.contest-play")
+        .create({
+          data: {
+            contest: contestId,
+            users_permissions_user: contestantId,
+          },
+        });
+
       return {
         contestant: _.omit(updatedContestant, ["password"]),
         contest: {
@@ -129,6 +140,7 @@ module.exports = createCoreService("api::contest.contest", ({ strapi }) => ({
             (user) => _.omit(user, ["password"])
           ),
         },
+        contestPlay,
       };
     } catch (error) {
       throw new Error(error);
@@ -156,10 +168,12 @@ module.exports = createCoreService("api::contest.contest", ({ strapi }) => ({
       }
     }
 
+    const ratio = correctAnswers.length / questions.length;
+
     return {
       correct: correctAnswers,
       incorrect: incorrectAnswers,
-      ratio: correctAnswers.length / questions.length,
+      ratio: ratio,
       percentage:
         correctAnswers.length === 0 && questions.length === 0
           ? "0%"
@@ -265,5 +279,41 @@ module.exports = createCoreService("api::contest.contest", ({ strapi }) => ({
       },
     });
     return response;
+  },
+  async onPlayerLost(userId, contestId) {
+    const contest = await strapi.query("api::contest.contest").findOne({
+      where: {
+        id: contestId,
+      },
+      populate: ["users_permissions_users"],
+    });
+    if (!contest) {
+      throw new Error("Contest not found!");
+    }
+    const filteredUsers = contest.users_permissions_users
+      .filter(({ id }) => id !== userId)
+      .map(({ id }) => id);
+    const updatedContest = await strapi.query("api::contest.contest").update({
+      where: {
+        id: contestId,
+      },
+      data: {
+        users_permissions_users: filteredUsers,
+      },
+    });
+
+    const contestPlay = await strapi
+      .query("api::contest-play.contest-play")
+      .update({
+        where: {
+          contest: contestId,
+          users_permissions_user: userId,
+        },
+        data: {
+          step: 0,
+        },
+      });
+
+    return { contest: updatedContest, contestPlay };
   },
 }));
