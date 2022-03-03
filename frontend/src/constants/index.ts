@@ -22,7 +22,9 @@ export const getEndpoint = (endpoint: string, params?: string | number) => {
     case "me":
       return "/users/me";
     case "activeContests":
-      return "/contests?filters[active]=true&sort[0]=expiration_date%3Aasc&populate[0]=category&populate[1]=users_permissions_users&pagination[start]=0&pagination[limit]=100";
+      return `/contests?filters[active]=true&sort[0]=expiration_date%3Aasc&populate[0]=category&populate[1]=users_permissions_users&pagination[page]=${
+        params ?? 1
+      }&pagination[pageSize]=12`;
     case "contest":
       return `/contest/${params}`;
     case "contestPlay":

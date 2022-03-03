@@ -63,6 +63,24 @@ const PlayContest = ({ contest, onFinish }: PlayContestProps) => {
     };
   }, []);
 
+  const registerQuestionAnswer = () => {
+    let currentAnswers = [];
+    const storedAnswers = localStorage.getData(`_trivia`);
+    if (storedAnswers?.[contest.id]?.answers) {
+      currentAnswers = storedAnswers[contest.id].answers;
+    }
+    let sendAnswer = "";
+    if (questions[currentQuestionIndex].answers.type === "multiple") {
+      sendAnswer =
+        questions[currentQuestionIndex].answers.questions[Number(answer)];
+    } else {
+      sendAnswer = answer;
+    }
+    localStorage.setData(`_trivia`, {
+      [contest.id]: { answers: [...currentAnswers, sendAnswer] },
+    });
+  };
+
   const onSubmit = async () => {
     const { setError, clearErrors } = methods;
     if (!answer) {
@@ -82,35 +100,16 @@ const PlayContest = ({ contest, onFinish }: PlayContestProps) => {
         );
         if (response.status === 200) {
           if (currentQuestionIndex < questions.length - 1) {
-            let currentAnswers = [];
-            const storedAnswers = localStorage.getData(
-              `${user.email}-contest-${contest.id}-answers`
-            );
-            if (storedAnswers?.answers) {
-              currentAnswers = storedAnswers.answers;
-            }
-            let sendAnswer = "";
-            if (questions[currentQuestionIndex].answers.type === "multiple") {
-              sendAnswer =
-                questions[currentQuestionIndex].answers.questions[
-                  Number(answer)
-                ];
-            } else {
-              sendAnswer = answer;
-            }
-            localStorage.setData(
-              `${user.email}-contest-${contest.id}-answers`,
-              { answers: [...currentAnswers, answer] }
-            );
+            registerQuestionAnswer();
             setCurrentQuestion(questions[currentQuestionIndex + 1]);
             setCurrentQuestionIndex((prevState) => prevState + 1);
             setTimer(null);
 
             setAnswer(null);
           } else {
-            const allAnswers = localStorage.getData(
-              `${user.email}-contest-${contest.id}-answers`
-            )?.answers;
+            registerQuestionAnswer();
+            const allAnswers =
+              localStorage.getData("_trivia")?.[contest.id].answers;
             const { data } = await axiosClient.post(
               getEndpoint("checkAnswers", contest.id),
               { data: allAnswers }

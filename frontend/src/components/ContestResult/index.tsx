@@ -67,7 +67,7 @@ const ContestResult = ({ data }: ContestResultComponentProps) => {
               {data.isWinner && (
                 <HStack>
                   <Heading size="sm">
-                    You`ve won <CoinIcon /> {contest.coins} coins !
+                    You`ve won <CoinIcon /> {contest.prizePool} coins !
                     Congratulations !
                   </Heading>
                 </HStack>

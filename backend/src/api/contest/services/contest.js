@@ -220,7 +220,7 @@ module.exports = createCoreService("api::contest.contest", ({ strapi }) => ({
         expiration_date: moment().add(1, "day").toDate(),
         active: true,
         difficulty,
-        prizePool: 0,
+        prizePool: cost * 2,
         slug: slugify(
           contestTitle.replace("#", "").replace(":", "")
         ).toLowerCase(),

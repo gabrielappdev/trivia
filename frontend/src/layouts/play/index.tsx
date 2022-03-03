@@ -79,18 +79,22 @@ const PlayTemplate = ({ children }: PlayTemplateProps) => {
   );
 
   useEffect(() => {
-    const loses = localStorage.getData("_trivia_user_lose")?.loses ?? [];
+    const loses = localStorage.getData("_trivia")?.[contest.id]?.loses ?? [];
     const finishes =
-      localStorage.getData("_trivia_user_finish")?.finishes ?? [];
+      localStorage.getData("_trivia")?.[contest.id]?.finishes ?? [];
     if (loses.includes(contest.id)) {
       handlePlayerLost(false);
-      localStorage.setData("_trivia_user_lose", {
-        loses: loses.filter((id) => id !== contest.id),
+      localStorage.setData("_trivia", {
+        [contest.id]: {
+          loses: loses.filter((id) => id !== contest.id),
+        },
       });
     }
     if (finishes.includes(contest.id)) {
-      localStorage.setData("_trivia_user_finish", {
-        finishes: finishes.filter((id) => id !== contest.id),
+      localStorage.setData("_trivia", {
+        [contest.id]: {
+          finishes: finishes.filter((id) => id !== contest.id),
+        },
       });
       handlePlayerLost(true);
     }
@@ -149,15 +153,20 @@ const PlayTemplate = ({ children }: PlayTemplateProps) => {
 
   useBeforeunload(() => {
     if (!contestFinish) {
-      let currentLoses = localStorage.getData("_trivia_user_lose")?.loses ?? [];
-      localStorage.setData("_trivia_user_lose", {
-        loses: [...currentLoses, contest.id],
+      let currentLoses =
+        localStorage.getData("_trivia")?.[contest.id]?.loses ?? [];
+      localStorage.setData("_trivia", {
+        [contest.id]: {
+          loses: [...currentLoses, contest.id],
+        },
       });
     } else {
       let currentFinishes =
-        localStorage.getData("_trivia_user_finish")?.finish ?? [];
-      localStorage.setData("_trivia_user_finish", {
-        finishes: [...currentFinishes, contest.id],
+        localStorage.getData("_trivia")?.[contest.id]?.finish ?? [];
+      localStorage.setData("_trivia", {
+        [contest.id]: {
+          finishes: [...currentFinishes, contest.id],
+        },
       });
     }
   });
@@ -166,8 +175,10 @@ const PlayTemplate = ({ children }: PlayTemplateProps) => {
     setShouldStart(true);
     setStartDate(null);
 
-    localStorage.setData(`${user.email}-contest-${contest.id}-answers`, {
-      answers: [],
+    localStorage.setData(`_trivia`, {
+      [contest.id]: {
+        answers: [],
+      },
     });
   };
 
