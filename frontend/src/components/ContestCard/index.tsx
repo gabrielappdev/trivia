@@ -39,6 +39,7 @@ export type ContestCardProps = {
   cost: number;
   category: string;
   users: number[];
+  isTesting?: boolean;
 };
 
 type PlayButtonProps = {
@@ -57,6 +58,7 @@ const ContestCard = ({
   cost,
   slug,
   category,
+  isTesting = false,
 }: ContestCardProps) => {
   const { mutate } = useSWRConfig();
 
@@ -78,13 +80,23 @@ const ContestCard = ({
     return (
       <Button
         cursor="pointer"
-        colorScheme="yellow"
+        colorScheme="purple"
+        borderBottom={`4px solid ${theme.colors.yellow[900]}`}
+        borderX={`1px solid ${theme.colors.yellow[600]}`}
         size="md"
-        leftIcon={<CoinIcon />}
+        rightIcon={
+          <Box py={2}>
+            <CoinIcon />
+          </Box>
+        }
         onClick={onClick ? onClick : () => ({})}
         isDisabled={isDisabled}
+        _hover={{
+          border: `1px solid ${theme.colors.yellow[600]}`,
+        }}
+        transition="border 0.1s ease-in-out"
       >
-        Play
+        {cost}
       </Button>
     );
   };
@@ -99,8 +111,9 @@ const ContestCard = ({
       });
       router.push(getRoute("signin"));
     };
-    if (user?.id) {
-      return <PlayButton isDisabled={user.coins - cost < 0} onClick={onOpen} />;
+    if (user?.id || isTesting) {
+      const isDisabled = isTesting ? false : user.coins - cost < 0;
+      return <PlayButton isDisabled={isDisabled} onClick={onOpen} />;
     } else {
       return <PlayButton onClick={handleUnsignewdUserClick} />;
     }
@@ -169,7 +182,7 @@ const ContestCard = ({
         filter={!active ? "grayscale(1)" : "none"}
         data-testid="contest-card-body"
       >
-        <Stack minH="180px">
+        <Stack minH="192px">
           <VStack align="flex-start" w="100%" p={2} pb={0} spacing={2}>
             <Tooltip label={title}>
               <Heading
@@ -193,10 +206,6 @@ const ContestCard = ({
             >
               <b>Category:</b> {category}
             </Text>
-            <HStack data-testid="cost">
-              <CoinIcon />
-              <Text fontSize="sm">Enter cost: {cost}</Text>
-            </HStack>
           </VStack>
           <HStack
             p={2}

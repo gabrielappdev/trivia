@@ -1,4 +1,5 @@
-import { render, within } from "@testing-library/react";
+import { render } from "../../test";
+import { within, waitFor, screen, fireEvent } from "@testing-library/react";
 import ContestCard from ".";
 
 const activeContestMock = {
@@ -38,11 +39,6 @@ test("Should render an active card correctly", () => {
   expect(getByText(activeContestMock.category)).toBeInTheDocument();
   expect(getByText("Active")).toBeInTheDocument();
   expect(
-    within(getByTestId("cost")).getByText(
-      new RegExp(activeContestMock.cost, "i")
-    )
-  ).toBeInTheDocument();
-  expect(
     within(getByTestId("pool")).getByText(
       new RegExp(activeContestMock.prizePool, "i")
     )
@@ -61,23 +57,24 @@ test("Should render an inactive card correctly", () => {
   expect(getByText(inactiveContestMock.category)).toBeInTheDocument();
   expect(getByText("Inactive")).toBeInTheDocument();
   expect(
-    within(getByTestId("cost")).getByText(
-      new RegExp(inactiveContestMock.cost, "i")
-    )
-  ).toBeInTheDocument();
-  expect(
     within(getByTestId("pool")).getByText(
       new RegExp(inactiveContestMock.prizePool, "i")
     )
   ).toBeInTheDocument();
 });
 
-test("Should render the play button if the expiration date was already passed", () => {
-  const { getByText } = render(<ContestCard {...activeContestMock} />);
-  expect(getByText("Play")).toBeInTheDocument();
-});
-
 test("Shouldn`t render the play button if the expiration date is in the future", () => {
   const { queryByText } = render(<ContestCard {...inactiveContestMock} />);
-  expect(queryByText("Play")).not.toBeInTheDocument();
+  expect(queryByText(activeContestMock.cost)).not.toBeInTheDocument();
+});
+
+test("Clicking the play button should render the dialog confirmation", async () => {
+  const { queryByText } = render(
+    <ContestCard {...activeContestMock} isTesting />
+  );
+  const playButton = queryByText(activeContestMock.cost);
+  await fireEvent.click(playButton);
+  await waitFor(() => {
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+  });
 });
