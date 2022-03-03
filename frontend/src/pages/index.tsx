@@ -39,11 +39,23 @@ const Index = () => {
 
   useEffect(() => {
     if (data) {
+      if (page === 1 && previousResultsRef.current.length) {
+        previousResultsRef.current = [];
+      }
       const { current: previousResults } = previousResultsRef;
       previousResultsRef.current = [...previousResults, ...data];
       setContests(previousResultsRef.current);
     }
-  }, [data]);
+  }, [data, page]);
+
+  useEffect(() => {
+    return () => {
+      setContests([]);
+      setPage(1);
+      setIsLastPage(false);
+      previousResultsRef.current = [];
+    };
+  }, []);
 
   if (error) return <div>failed to load</div>;
   if (!data && page === 1) {
