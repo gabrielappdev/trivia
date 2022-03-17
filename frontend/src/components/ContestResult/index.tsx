@@ -20,15 +20,22 @@ import { useMemo } from "react";
 
 type ContestResultComponentProps = {
   data: ContestResultProps;
+  isTesting: boolean;
 };
 
-const ContestResult = ({ data }: ContestResultComponentProps) => {
+const ContestResult = ({
+  data,
+  isTesting = false,
+}: ContestResultComponentProps) => {
   const countUp = data.ratio * 100;
   const [contest] = useRecoilState(contestAtom);
 
   const showIconDate = useMemo(
-    () => new Date().setSeconds(new Date().getSeconds() + 3),
-    []
+    () =>
+      isTesting
+        ? new Date().setSeconds(new Date().getSeconds() + 0.1)
+        : new Date().setSeconds(new Date().getSeconds() + 3),
+    [isTesting]
   );
 
   return (
@@ -65,7 +72,7 @@ const ContestResult = ({ data }: ContestResultComponentProps) => {
                 alt={data.isWinner ? "Winner" : "Loser"}
               />
               {data.isWinner && (
-                <HStack>
+                <HStack aria-label="Contest winner">
                   <Heading size="sm">
                     You`ve won <CoinIcon /> {contest.prizePool} coins !
                     Congratulations !

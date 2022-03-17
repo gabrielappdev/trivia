@@ -91,15 +91,17 @@ const Index = () => {
                   <ContestCard key={contest.id} {...contest} />
                 ))}
               </SimpleGrid>
-              <Button
-                colorScheme="purple"
-                loadingText="Loading more"
-                isLoading={!data}
-                isDisabled={isLastPage}
-                onClick={() => setPage((currentPage) => currentPage + 1)}
-              >
-                {isLastPage ? "There`s more contests to fetch" : "Load More"}
-              </Button>
+              {contests.length >= 20 && (
+                <Button
+                  colorScheme="purple"
+                  loadingText="Loading more"
+                  isLoading={!data}
+                  isDisabled={isLastPage}
+                  onClick={() => setPage((currentPage) => currentPage + 1)}
+                >
+                  {isLastPage ? "There`s more contests to fetch" : "Load More"}
+                </Button>
+              )}
             </Stack>
           )}
         </>
